@@ -13,8 +13,8 @@ export default function Navbar() {
           <ul>
             <li><Link to="/" className={location.pathname === "/" ? "active" : ""}>Home</Link></li>
             <li><Link to="/search" className={location.pathname === "/search" ? "active" : ""}>Search</Link></li>
-            <li><Link to="/report-lost" className={location.pathname === "/report-lost" ? "active" : ""}>Lost Item</Link></li>
-            <li><Link to="/report-found" className={location.pathname === "/report-found" ? "active" : ""}>Found Item</Link></li>
+            <li><Link to="/lost-items" className={location.pathname === "/lost-items" ? "active" : ""}>Lost Item</Link></li>
+            <li><Link to="/found-items" className={location.pathname === "/found-items" ? "active" : ""}>Found Item</Link></li>
             <li><Link to="/login" className={location.pathname === "/login" ? "active" : ""}>Login</Link></li>
           </ul>
         </nav>

@@ -7,6 +7,8 @@ import ReportLost from "./pages/ReportLost";
 import ReportFound from "./pages/ReportFound";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import LostItems from "./pages/LostItems";
+import FoundItems from "./pages/FoundItems";
 
 function App() {
   return (
@@ -20,6 +22,8 @@ function App() {
         <Route path="/report-found" element={<ReportFound />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/lost-items" element={<LostItems />} />
+        <Route path="/found-items" element={<FoundItems />} />
       </Routes>
 
       <Footer />
