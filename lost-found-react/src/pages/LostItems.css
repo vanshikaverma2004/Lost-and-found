@@ -84,3 +84,12 @@
 .dropdown-content a:hover {
   background-color: #f2f2f2;
 }
+.lost-card-link {
+  text-decoration: none;
+  color: inherit;
+}
+/* .lost-card-link:hover .lost-card {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
+} */

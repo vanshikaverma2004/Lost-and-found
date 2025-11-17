@@ -1,34 +1,33 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./ReportFound.css";
 
 export default function ReportFound() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     item: "",
     description: "",
     location: "",
     phone: "",
     name: "",
-    date: "",
-    photo: null,
+    date: ""
   });
 
   const [success, setSuccess] = useState(false);
 
-  
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
+    const { name, value } = e.target;
 
     setFormData({
       ...formData,
-      [name]: files ? files[0] : value,
+      [name]: value
     });
   };
 
-    
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    
     if (
       !formData.item ||
       !formData.description ||
@@ -46,29 +45,65 @@ export default function ReportFound() {
       return;
     }
 
-    
-    setSuccess(true);
+    try {
+      const response = await fetch("http://localhost:5000/api/found-items", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json","Authorization": "Bearer " + localStorage.getItem("token") 
+        },
+        body: JSON.stringify({
+          title: formData.item,
+          description: formData.description,
+          location: formData.location,
+          phone: formData.phone,
+          name: formData.name,
+          date_found: formData.date
+        })
+      });
 
-    
-    setFormData({
-      item: "",
-      description: "",
-      location: "",
-      phone: "",
-      name: "",
-      date: "",
-      photo: null,
-    });
+      if (!response.ok) {
+        throw new Error("Failed to submit");
+      }
+
+      // Show popup
+      setSuccess(true);
+
+      // Clear form
+      setFormData({
+        item: "",
+        description: "",
+        location: "",
+        phone: "",
+        name: "",
+        date: ""
+      });
+
+      // After popup → redirect
+      setTimeout(() => {
+        setSuccess(false);
+        navigate("/found-items");
+      }, 1500);
+
+    } catch (error) {
+      alert("Failed to submit. Check server.");
+      console.error(error);
+    }
   };
 
+              if (!localStorage.getItem("token")) {
+                    window.location.href = "/login";
+  return;
+}
+
+
   return (
-    <div className="found-form-page">
+    <div className="lost-form-page">
 
       <h2 className="form-title">Report Found Item</h2>
 
-      <form className="found-form" onSubmit={handleSubmit}>
-        
-        <label>Item Found:</label>
+      <form className="lost-form" onSubmit={handleSubmit}>
+
+        <label>Item Name:</label>
         <input
           type="text"
           name="item"
@@ -76,14 +111,6 @@ export default function ReportFound() {
           onChange={handleChange}
           placeholder="Enter found item name"
           required
-        />
-
-        <label>Upload Photo:</label>
-        <input
-          type="file"
-          name="photo"
-          accept="image/*"
-          onChange={handleChange}
         />
 
         <label>Description:</label>
@@ -135,21 +162,22 @@ export default function ReportFound() {
           required
         />
 
-        <button type="submit" className="btn submit-btn">
-          Submit Found Report
-        </button>
+        <button type="submit" className="btn submit-btn">Submit Report</button>
       </form>
 
       {success && (
         <div className="popup">
           <div className="popup-box">
             <p>Found Item Report Submitted Successfully ✔</p>
-            <button className="close-btn" onClick={() => setSuccess(false)}>
-              OK
+             <button className="close-btn" onClick={() => {setSuccess(false);navigate("/found-items");}}>
+                     OK
             </button>
+
+          
           </div>
         </div>
       )}
+
     </div>
   );
 }

@@ -1,20 +1,22 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./ReportLost.css";
 
 export default function ReportLost() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
-    item: "",
+    title: "",
     description: "",
     location: "",
     phone: "",
     name: "",
-    date: "",
-    photo: null
+    date_lost: "",
+    
   });
 
   const [success, setSuccess] = useState(false);
 
-  
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
@@ -24,18 +26,17 @@ export default function ReportLost() {
     });
   };
 
-  
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    
+    // Validation
     if (
-      !formData.item ||
+      !formData.title ||
       !formData.description ||
       !formData.location ||
       !formData.phone ||
       !formData.name ||
-      !formData.date
+      !formData.date_lost
     ) {
       alert("Please fill all required fields.");
       return;
@@ -46,23 +47,61 @@ export default function ReportLost() {
       return;
     }
 
-    setSuccess(true);
+    try {
+      const response = await fetch("http://localhost:5000/api/lost-items", {
+            method: "POST",
+                 headers: { 
+                         "Content-Type": "application/json",
+                           "Authorization": "Bearer " + localStorage.getItem("token") 
+                    },
+             body: JSON.stringify({
+    title: formData.title,
+    description: formData.description,
+    location: formData.location,
+    phone: formData.phone,
+    name: formData.name,
+    date_lost: formData.date_lost
+  })
+});
 
-    
-    setFormData({
-      item: "",
-      description: "",
-      location: "",
-      phone: "",
-      name: "",
-      date: "",
-      photo: null
-    });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.error || "Error submitting lost item.");
+        return;
+      }
+
+      setSuccess(true);
+
+      setFormData({
+        title: "",
+        description: "",
+        location: "",
+        phone: "",
+        name: "",
+        date_lost: "",
+        
+      });
+
+    } catch (error) {
+      alert("Something went wrong. Try again.");
+    }
   };
+
+  const handlePopupClose = () => {
+    setSuccess(false);
+    navigate("/lost-items");
+  };
+
+    if (!localStorage.getItem("token")) {
+  window.location.href = "/login";
+  return;
+}
+
 
   return (
     <div className="lost-form-page">
-
       <h2 className="form-title">Report Lost Item</h2>
 
       <form className="lost-form" onSubmit={handleSubmit}>
@@ -70,20 +109,13 @@ export default function ReportLost() {
         <label>Item Name:</label>
         <input
           type="text"
-          name="item"
-          value={formData.item}
+          name="title"
+          value={formData.title}   // 🔥 FIXED
           onChange={handleChange}
           placeholder="Enter lost item name"
-          required
         />
 
-        <label>Upload Photo:</label>
-        <input
-          type="file"
-          name="photo"
-          accept="image/*"
-          onChange={handleChange}
-        />
+        
 
         <label>Description:</label>
         <textarea
@@ -92,7 +124,6 @@ export default function ReportLost() {
           value={formData.description}
           onChange={handleChange}
           placeholder="Describe color, brand, unique marks..."
-          required
         ></textarea>
 
         <label>Location Lost:</label>
@@ -102,7 +133,6 @@ export default function ReportLost() {
           value={formData.location}
           onChange={handleChange}
           placeholder="e.g. Library, Cafeteria"
-          required
         />
 
         <label>Phone No:</label>
@@ -112,7 +142,6 @@ export default function ReportLost() {
           value={formData.phone}
           onChange={handleChange}
           placeholder="Enter 10-digit number"
-          required
         />
 
         <label>Your Name:</label>
@@ -122,33 +151,29 @@ export default function ReportLost() {
           value={formData.name}
           onChange={handleChange}
           placeholder="Enter your name"
-          required
         />
 
         <label>Date Lost:</label>
         <input
           type="date"
-          name="date"
-          value={formData.date}
+          name="date_lost"
+          value={formData.date_lost}   // 🔥 FIXED
           onChange={handleChange}
-          required
         />
 
         <button type="submit" className="btn submit-btn">Submit Report</button>
       </form>
 
-      
       {success && (
         <div className="popup">
           <div className="popup-box">
             <p>Lost Item Report Submitted Successfully ✔</p>
-            <button className="close-btn" onClick={() => setSuccess(false)}>
+            <button className="close-btn" onClick={handlePopupClose}>
               OK
             </button>
           </div>
         </div>
       )}
-
     </div>
   );
 }

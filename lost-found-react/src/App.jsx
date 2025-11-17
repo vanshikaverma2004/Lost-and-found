@@ -9,6 +9,8 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import LostItems from "./pages/LostItems";
 import FoundItems from "./pages/FoundItems";
+import LostDetails from "./pages/LostDetails";
+import FoundDetails from "./pages/FoundDetails";
 
 function App() {
   return (
@@ -24,6 +26,9 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/lost-items" element={<LostItems />} />
         <Route path="/found-items" element={<FoundItems />} />
+        <Route path="/lost/:id" element={<LostDetails />} />
+        <Route path="/found/:id" element={<FoundDetails />} />
+
       </Routes>
 
       <Footer />

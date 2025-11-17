@@ -1,31 +1,61 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./LostItems.css";
 
 export default function LostItems() {
   const [open, setOpen] = useState(false);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const items = [
-    { title: "ID Card", description: "Student id found near libary" },
-    { title: "Mobile Phone", description: "White color sansumg" },
-    { title: "Bag", description: "Blue color bag" },
-  ];
+  // Fetch lost items
+  useEffect(() => {
+    const fetchLostItems = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/lost-items");
+        const data = await response.json();
+        setItems(data);
+      } catch (error) {
+        console.error("Failed to fetch lost items:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLostItems();
+  }, []);
 
   return (
     <div className="lost-page">
 
       <h2 className="lost-title">Lost Items</h2>
 
+      {loading && <p>Loading items...</p>}
+
       <div className="lost-items-container">
-        {items.map((item, index) => (
-          <div className="lost-card" key={index}>
-            <h3>{item.title}</h3>
-            <p>{item.description}</p>
-          </div>
-        ))}
+        
+
+        {!loading &&
+        items.map((item) => (
+        <Link
+          to={`/lost/${item.id}`}
+             key={item.id}
+            className="lost-card-link"
+    >
+              <div className="lost-card">
+               <h3>{item.title}</h3>
+                <p>{item.description}</p>
+
+                 <p><strong>Location:</strong> {item.location}</p>
+                   <p><strong>Owner:</strong> {item.name}</p>
+                     <p><strong>Date:</strong> {item.date_lost}</p>
+              </div>
+         </Link>
+  ))
+}
+
       </div>
 
-      {/* Dropdown section */}
+      {/* Dropdown */}
       <div className="dropdown">
         <button className="dropbtn" onClick={() => setOpen(!open)}>
           New Query ▼

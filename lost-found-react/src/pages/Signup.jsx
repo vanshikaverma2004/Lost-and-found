@@ -1,7 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Signup.css";
 
 export default function Signup() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -23,12 +26,13 @@ export default function Signup() {
   };
 
   // Submit form
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
     const { name, email, password, confirmPass } = formData;
 
+    // Basic validation
     if (!name || !email || !password || !confirmPass) {
       setError("All fields are required.");
       return;
@@ -44,16 +48,39 @@ export default function Signup() {
       return;
     }
 
-    // Success popup
-    setSuccess(true);
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password })
+      });
 
-    // Clear form
-    setFormData({
-      name: "",
-      email: "",
-      password: "",
-      confirmPass: ""
-    });
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || "Signup failed");
+        return;
+      }
+
+      // Show success popup
+      setSuccess(true);
+
+      // Clear fields
+      setFormData({
+        name: "",
+        email: "",
+        password: "",
+        confirmPass: ""
+      });
+
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+    }
+  };
+
+  const handlePopupClose = () => {
+    setSuccess(false);
+    navigate("/login"); // redirect to login page after success
   };
 
   return (
@@ -90,10 +117,7 @@ export default function Signup() {
             placeholder="Create password"
             onChange={handleChange}
           />
-          <span
-            className="toggle-pass"
-            onClick={() => setShowPass(!showPass)}
-          >
+          <span className="toggle-pass" onClick={() => setShowPass(!showPass)}>
             {showPass ? "🙈" : "👁️"}
           </span>
         </div>
@@ -107,10 +131,7 @@ export default function Signup() {
             placeholder="Confirm password"
             onChange={handleChange}
           />
-          <span
-            className="toggle-pass"
-            onClick={() => setShowConfirm(!showConfirm)}
-          >
+          <span className="toggle-pass" onClick={() => setShowConfirm(!showConfirm)}>
             {showConfirm ? "🙈" : "👁️"}
           </span>
         </div>
@@ -130,7 +151,7 @@ export default function Signup() {
         <div className="popup">
           <div className="popup-box">
             <p>Account Created Successfully ✔</p>
-            <button className="close-btn" onClick={() => setSuccess(false)}>
+            <button className="close-btn" onClick={handlePopupClose}>
               OK
             </button>
           </div>

@@ -1,14 +1,17 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Login.css";
 
 export default function Login() {
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -17,15 +20,42 @@ export default function Login() {
       return;
     }
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
-      return;
-    }
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-    
-    setSuccess(true);
-    setEmail("");
-    setPassword("");
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || "Invalid email or password.");
+        return;
+      }
+
+      // ⭐ Save token
+      localStorage.setItem("token", data.token);
+
+      // ⭐ Save full user data
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      // ⭐ Save USERNAME separately (for navbar)
+      localStorage.setItem("username", data.user.name);
+
+      // ⭐ Save User ID if needed later
+      localStorage.setItem("userId", data.user.id);
+
+      setSuccess(true);
+
+    } catch (err) {
+      setError("Something went wrong. Try again.");
+    }
+  };
+
+  const handlePopupClose = () => {
+    setSuccess(false);
+    navigate("/"); // redirect to homepage
   };
 
   return (
@@ -41,7 +71,6 @@ export default function Login() {
           placeholder="Enter your email or name"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          required
         />
 
         <label>Password:</label>
@@ -51,7 +80,6 @@ export default function Login() {
             placeholder="Enter password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            required
           />
 
           <span
@@ -62,7 +90,6 @@ export default function Login() {
           </span>
         </div>
 
-        
         {error && <p className="error-text">{error}</p>}
 
         <button className="btn login-btn" type="submit">
@@ -74,12 +101,11 @@ export default function Login() {
         </p>
       </form>
 
-      
       {success && (
         <div className="popup">
           <div className="popup-box">
             <p>Login Successful ✔</p>
-            <button className="close-btn" onClick={() => setSuccess(false)}>
+            <button className="close-btn" onClick={handlePopupClose}>
               OK
             </button>
           </div>

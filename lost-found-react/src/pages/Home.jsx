@@ -13,7 +13,7 @@ export default function Home() {
         </div>
 
         <div className="recent">
-          <a className="btn secondary" href="/search">Recently Found Items</a>
+          <a className="btn secondary" href="/search">Recently Added Items</a>
         </div>
       </section>
     </main>
